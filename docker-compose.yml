@@ -1,4 +1,10 @@
 version: '3'
+
+volumes:
+  # We'll define a volume that will store the data from the postgres databases:
+  cms-data:
+    driver: local
+
 services:
   web:
     build: .
@@ -6,8 +12,19 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - 8000:8000
+    links:
+      - postgres
     depends_on:
-      - db
-  db:
-    image: postgres
+      - postgres
+  postgres:
+    image: postgres:9.6
+    restart: always
+    volumes:
+      - cms-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=ukefdbu
+      - POSTGRES_PASSWORD=secured-password
+      - POSTGRES_DB=ukefcms
